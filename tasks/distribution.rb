@@ -11,7 +11,7 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
 end
 
 Jeweler::Tasks.new do |gem|
-  gem.name = 'after_commit'
+  gem.name = 'aleksi-after_commit'
   gem.summary = 'after_commit callback for ActiveRecord'
   gem.description = %Q{
     A Ruby on Rails plugin to add an after_commit callback. This can be used to trigger methods only after the entire transaction is complete.

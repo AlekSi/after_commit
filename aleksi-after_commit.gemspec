@@ -4,12 +4,12 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{after_commit}
-  s.version = "1.0.7"
+  s.name = %q{aleksi-after_commit}
+  s.version = "1.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Nick Muerdter", "David Yip", "Pat Allan"]
-  s.date = %q{2010-05-20}
+  s.date = %q{2010-08-05}
   s.description = %q{
     A Ruby on Rails plugin to add an after_commit callback. This can be used to trigger methods only after the entire transaction is complete.
   }
@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/freelancing-god/after_commit}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.6}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{after_commit callback for ActiveRecord}
   s.test_files = [
     "test/after_commit_test.rb",
@@ -41,7 +41,7 @@ Gem::Specification.new do |s|
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<activerecord>, [">= 0"])
       s.add_development_dependency(%q<sqlite3-ruby>, [">= 0"])
     else
