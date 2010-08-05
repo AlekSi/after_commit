@@ -30,52 +30,61 @@ module AfterCommit
       end
     end
   end
-  
+
   module TestConnectionAdapters
     def self.included(base)
       base.class_eval do
+
+        # matches commit_db_transaction_with_callback
         def release_savepoint_with_callback
           increment_transaction_pointer
-          committed = false
+          result    = nil
           begin
             trigger_before_commit_callbacks
             trigger_before_commit_on_create_callbacks
-            trigger_before_commit_on_save_callbacks
             trigger_before_commit_on_update_callbacks
+            trigger_before_commit_on_save_callbacks
             trigger_before_commit_on_destroy_callbacks
-            
-            release_savepoint_without_callback
-            committed = true
-            
+
+            result = release_savepoint_without_callback
+            @disable_rollback = true
+
             trigger_after_commit_callbacks
             trigger_after_commit_on_create_callbacks
-            trigger_after_commit_on_save_callbacks
             trigger_after_commit_on_update_callbacks
+            trigger_after_commit_on_save_callbacks
             trigger_after_commit_on_destroy_callbacks
+            result
           rescue
-            unless committed
+            # Need to decrement the transaction pointer before calling
+            # rollback... to ensure it is not incremented twice
+            unless @disable_rollback
               decrement_transaction_pointer
-              rollback_to_savepoint
-              increment_transaction_pointer
+              @already_decremented = true
             end
+
+            # We still want to raise the exception.
+            raise
+          ensure
+            AfterCommit.cleanup(self)
+            decrement_transaction_pointer unless @already_decremented
+          end
+        end
+        alias_method_chain :release_savepoint, :callback
+
+        # matches rollback_db_transaction_with_callback
+        def rollback_to_savepoint_with_callback
+          return if @disable_rollback
+          increment_transaction_pointer
+          begin
+            result = nil
+            trigger_before_rollback_callbacks
+            result = rollback_to_savepoint_without_callback
+            trigger_after_rollback_callbacks
+            result
           ensure
             AfterCommit.cleanup(self)
             decrement_transaction_pointer
-          end
-        end 
-        alias_method_chain :release_savepoint, :callback
-
-        # In the event the transaction fails and rolls back, nothing inside
-        # should recieve the after_commit callback, but do fire the after_rollback
-        # callback for each record that failed to be committed.
-        def rollback_to_savepoint_with_callback
-          increment_transaction_pointer
-          begin
-            trigger_before_rollback_callbacks
-            rollback_to_savepoint_without_callback
-            trigger_after_rollback_callbacks
-          ensure
-            AfterCommit.cleanup(self)
           end
           decrement_transaction_pointer
         end
