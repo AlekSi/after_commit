@@ -55,19 +55,9 @@ module AfterCommit
             trigger_after_commit_on_save_callbacks
             trigger_after_commit_on_destroy_callbacks
             result
-          rescue
-            # Need to decrement the transaction pointer before calling
-            # rollback... to ensure it is not incremented twice
-            unless @disable_rollback
-              decrement_transaction_pointer
-              @already_decremented = true
-            end
-
-            # We still want to raise the exception.
-            raise
           ensure
             AfterCommit.cleanup(self)
-            decrement_transaction_pointer unless @already_decremented
+            decrement_transaction_pointer
           end
         end
         alias_method_chain :release_savepoint, :callback
